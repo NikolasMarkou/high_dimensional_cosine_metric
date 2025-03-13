@@ -60,11 +60,11 @@ const CosineDistributionVisualization = () => {
         // Dimensions to analyze (powers of 2 for better distribution)
         const dimensions = [2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048];
         
-        // Reduce sample size for higher dimensions to improve performance
+        // Increase sample size for higher dimensions
         const getAdjustedSampleSize = (dim) => {
           if (dim <= 32) return 10000;
           if (dim <= 256) return 20000;
-          return 100000;
+          return 50000;
         };
         
         const statistics = [];
