@@ -17,33 +17,19 @@ const CosineDistributionVisualization = () => {
   const [data, setData] = useState(null);
   const [selectedDimensions, setSelectedDimensions] = useState([2, 32, 128, 512]);
   const [isLoading, setIsLoading] = useState(true);
-  // Add missing loading progress state
-  const [loadingProgress, setLoadingProgress] = useState(0);
-  // Add state to track current dimension being processed
-  const [currentDimension, setCurrentDimension] = useState(null);
 
   // Function to parse CSV data (we'd normally load this from a file)
   useEffect(() => {
-    // Start generating data with progress updates
-    const generateData = async () => {
-      setIsLoading(true);
-      setLoadingProgress(0);
-      
-      // Simulate loading data in chunks to show progress
-      const result = await generateSyntheticData((progress, dimension) => {
-        setLoadingProgress(progress);
-        setCurrentDimension(dimension);
-      });
-      
-      setData(result);
+    // Simulate loading data by using the hardcoded sample data
+    setTimeout(() => {
+      // In a real implementation, we'd load the CSV here
+      setData(generateSyntheticData());
       setIsLoading(false);
-    };
-    
-    generateData();
+    }, 1000);
   }, []);
 
   // Generate synthetic data for demonstration
-  const generateSyntheticData = async (progressCallback) => {
+  const generateSyntheticData = () => {
     const dimensions = [2, 3, 5, 10, 32, 64, 128, 256, 512, 1024];
     const statistics = dimensions.map(dim => {
       const theoreticalStd = 1.0 / Math.sqrt(dim);
@@ -60,18 +46,13 @@ const CosineDistributionVisualization = () => {
 
     // Generate distribution samples for each dimension
     const distributionSamples = {};
-    const samplesPerDimension = 10000; // Increased from 1000 to 10000 for smoother curves
     
-    for (let i = 0; i < dimensions.length; i++) {
-      const dim = dimensions[i];
-      // Update current dimension being processed
-      progressCallback(Math.round((i) / dimensions.length * 100), dim);
-      
+    dimensions.forEach(dim => {
       const samples = [];
       const stdDev = 1.0 / Math.sqrt(dim);
       
-      // Generate samples for this dimension
-      for (let j = 0; j < samplesPerDimension; j++) {
+      // Generate 1000 samples for each dimension
+      for (let i = 0; i < 1000; i++) {
         // Approximate normal distribution centered at 1.0 with stdDev
         let u1 = Math.random();
         let u2 = Math.random();
@@ -90,24 +71,10 @@ const CosineDistributionVisualization = () => {
           originalDistance,
           normalizedDistance
         });
-        
-        // Update progress every few samples
-        if (j % 1000 === 0) {
-          const dimProgress = j / samplesPerDimension;
-          const overallProgress = (i + dimProgress) / dimensions.length;
-          progressCallback(Math.round(overallProgress * 100), dim);
-          
-          // Let the UI update
-          await new Promise(resolve => setTimeout(resolve, 0));
-        }
       }
       
       distributionSamples[dim] = samples;
-      
-      // Update progress after dimension is complete
-      progressCallback(Math.round((i + 1) / dimensions.length * 100), dim);
-      await new Promise(resolve => setTimeout(resolve, 0));
-    }
+    });
 
     return {
       dimensions,
@@ -116,32 +83,10 @@ const CosineDistributionVisualization = () => {
     };
   };
 
-  // Enhanced loading display with progress bar and dimension indicator
   if (isLoading) {
     return (
-      <div className="flex flex-col justify-center items-center h-64 p-6">
-        <div className="text-xl mb-4">Loading distribution data...</div>
-        
-        {/* Show which dimension is being calculated */}
-        {currentDimension && (
-          <div className="text-lg mb-4">
-            Currently processing: <span className="font-semibold">Dimension {currentDimension}</span>
-          </div>
-        )}
-        
-        {/* Progress bar container */}
-        <div className="w-full max-w-lg bg-gray-200 rounded-full h-4 mb-2">
-          {/* Progress bar fill */}
-          <div 
-            className="bg-blue-600 h-4 rounded-full transition-all duration-300"
-            style={{ width: `${loadingProgress}%` }}
-          />
-        </div>
-        
-        {/* Progress percentage */}
-        <div className="text-md">
-          {loadingProgress}% complete
-        </div>
+      <div className="flex justify-center items-center h-64">
+        <div className="text-xl">Loading distribution data...</div>
       </div>
     );
   }
